@@ -164,9 +164,7 @@
             .attr("y", (d, i) => yScale(labs[i]))
             .attr("width", (d) => xScale(d))
             .attr("height", yScale.bandwidth())
-            .attr("fill", "#FF7D6E")
-            .append("title")
-            .text(d => d);
+            .attr("fill", "#FF7D6E");
         
         bars.append("g")
           .attr("class", "xAxis")
@@ -183,10 +181,6 @@
 
       var samp_lab = Object.keys(data_m[0].types);
       var samp_dat = Object.values(data_m[0].types);
-
-      function whenClick(d_, labs) {
-        drawBar()
-      }
 
 			//Load in data
 			d3.csv("https://raw.githubusercontent.com/sasana-uwu/571-project/main/data.csv", function(d) {
