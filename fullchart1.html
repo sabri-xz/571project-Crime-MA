@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<!-- Regular buttons
+<button onclick="update('allCrimes')">All Crimes</button>
+<button onclick="update('Arson')">Arson</button>
+<button onclick="update('Credit Card/Automated Teller Machine Fraud')">Credit Card/ATM Fraud</button>
+<button onclick="update('Hacking/Computer Invasion')">Hacking</button>
+<button onclick="update('Intimidation')">Intimidation</button> -->
+
+<!-- used radio buttons so choice is kept visible-->
+<input type="radio" id="all" name="crime" onclick="update('allCrimes')">
+<label for="all">All Crimes   </label>
+
+<input type="radio" id="arson" name="crime" onclick="update('Arson')">
+<label for="arson">Arson   </label>
+
+<input type="radio" id="burglary" name="crime" onclick="update('Burglary/Breaking & Entering')">
+<label for="all">Burglary/B & E   </label>
+
+<input type="radio" id="atm" name="crime" onclick="update('Credit Card/Automated Teller Machine Fraud')">
+<label for="atm">Credit Card/ATM Fraud   </label>
+
+<input type="radio" id="embez" name="crime" onclick="update('Embezzlement')">
+<label for="embez">Embezzlement   </label>
+
+<input type="radio" id="hacking" name="crime" onclick="update('Hacking/Computer Invasion')">
+<label for="arson">Hacking   </label>
+
+<input type="radio" id="sa" name="crime" onclick="update('Simple Assault')">
+<label for="sa">Simple Assault   </label>
+
+
+
+
+<div id="moving_bars"></div>
+
+
+<script>
+
+var margin = {top: 30, right: 80, bottom: 70, left: 130},
+    width = 800 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+var svg = d3.select("#moving_bars")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//x axis
+var y = d3.scaleBand()
+  .range([ 0, height ])
+  .padding(0.2);
+var yAxis = svg.append("g")
+  .attr("transform", "translate(" + margin.left +")")
+
+//y axis
+var x = d3.scaleLinear()
+  .range([0, width - margin.right]);
+var xAxis = svg.append("g")
+  .attr("transform", "translate("+ margin.left + ", " + height + ")")
+
+
+//creates chart depending on column variable
+function update(selection) {
+
+  d3.csv("https://raw.githubusercontent.com/ebucknam/571/main/relByCrimeType.csv", function(data) {
+    //sort descending, reverse b[selection] and a[selection] to sort ascending
+    data.sort(function(a, b) {
+        return b[selection] - a[selection];
+      });
+
+    //y axis
+    y.domain(data.map(function(d) { return d.relType; }))
+    yAxis.transition().duration(500).call(d3.axisLeft(y))
+
+    //x axis
+    x.domain([0, d3.max(data, function(d) { return +d[selection] }) ]);
+    xAxis.transition()
+      .duration(500)
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+      .attr("transform", "translate(-10,0)rotate(-30)")
+      .style("text-anchor", "end");;
+
+    //svg bars variable
+    var u = svg.selectAll("rect")
+      .data(data)
+
+    u
+      .enter()
+      .append("rect")
+      .merge(u) //add new data to existing rectangles
+      .transition()
+      .duration(500)  
+        .attr("y", function(d) { return y(d.relType); })
+        .attr("x", 1 + margin.left)
+        .attr("height", y.bandwidth())
+        .attr("width", function(d) { return x(d[selection]); })
+        .attr("fill", "#DA2629")
+        // .append("title")
+        // .text(function(d){return x(d[selection])})
+  })
+
+}
+
+//initialize
+update('allCrimes')
+
+</script>

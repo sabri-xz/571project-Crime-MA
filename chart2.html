@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+  
+button {
+  display:inline-block;
+  
+  font:normal normal 300 1.3em 'Open Sans';
+  text-decoration:none; 
+  
+  color:#000000;
+  background-color:transparent;
+  border:1px solid #000000;
+  border-radius:100px;
+  
+  padding: .3em 1.2em;
+  margin:5px;
+      
+  background-size: 200% 100%; 
+  background-image: linear-gradient(to right, transparent 50%, rgba(28, 190, 131, 1) 50%);
+  transition: background-position .3s cubic-bezier(0.19, 1, 0.22, 1) .1s, color .5s ease 0s, background-color .5s ease;
+}
+
+button:hover{
+  color:rgba(255, 255, 255, 1);
+  background-color:rgba(28, 190, 131, 1);
+  background-position: -100% 100%;
+}
+</style>
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<body>
+<div style="margin: 0px 500px;">
+<button onclick="update(Age)">Age</button>
+<button onclick="update(Sex)">Sex</button>
+<button onclick="update(Race)">Race</button>
+<button onclick="update(Ethnicity)">Ethnicity</button>
+</div>
+<div id='blank' style="margin: 100px; display: inline-block;"></div>
+<div id="Chart2a" style="display: inline-block;"><h3 style="text-align: center;">OFFENDERS</h3>
+</div>
+<div id="legend" style="display: inline-block;"></div>
+<div id="Chart2b" style="display: inline-block;"><h3 style="text-align: center;">VICTIMS</h3></div>
+
+</body>
+<script>
+
+// set the dimensions and margins of the graph
+var width = 350
+    height = 350
+    margin = 40
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+var radius = width / 2 - (margin)
+
+
+var Age = { O: {"1-10": 1807, "11-20": 16241, "21-30": 33729,"31-40": 31024,"41-50": 23799,"51-60": 21405,"61-70":12801, "71-80": 5813,"81-90": 2224,"91-100": 397}, V : {"1-10": 311, "11-20": 18575, "21-30": 30864,"31-40": 26877,"41-50": 15064,"51-60": 9688,"61-70":3136, "71-80": 745,"81-90": 249,"91-100": 37}}
+var Sex={O:{"Male":76634 , "Female":31011},V: {"Male":73005,"Female": 77837}}
+var Race={O:{"American Indian": 131, "Asian":1463, "Black or African American": 23301, "Native Hawaiian or other Pacific":2, "White": 75599, "Unknown": 12026},V: {"American Indian": 315, "Asian":4406, "Black or African American": 20300, "Native Hawaiian or other Pacific":6, "White": 114316, "Unknown": 12672}}
+var Ethnicity={O:{"Hispanic or Latino":20383, "Not Hispanic or Latino": 66994, "Unknown": 22524},V:{"Hispanic or Latino":23501, "Not Hispanic or Latino": 102424, "Unknown": 18906}}
+
+// set the color scale
+var color = d3.scaleOrdinal(["#073b4c","#ef476f","#f78c6b","#ffd166","#83d483","#06d6a0","#09c3a5","#0cb0a9","#118ab2","#0c637f"]);
+
+// A function that create / update the plot for a given variable:
+function update(data) {
+  dataO= data.O
+  dataV=data.V
+  change(dataO,dataV)
+}
+
+function draw(dataa,datab){
+
+
+var div = d3.select("body").append("div")
+     .attr("class", "tooltip-donut")
+     .style("opacity", 0)
+     .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+    .style("width", "200px")
+    .style("position", "absolute");
+
+var legend=d3.select('#legend')
+    .append("svg")
+    .attr("width", 300)
+    .attr("height", height)
+    .style("padding", "5px")
+    .style("margin", "50px")
+
+legend.selectAll("mydots")
+    .data(d3.keys(dataa))
+    .enter()
+    .append("circle")
+    .attr("cx", 50)
+    .attr("cy", function(d,i){return 100+i*25})
+    .attr("r",7)
+    .style("fill", function(d){return color(d)})
+
+legend.selectAll("labels")
+    .data(d3.keys(dataa))
+    .enter()
+    .append("text")
+    .attr("x", function(d,i){return 75})
+    .attr("y", function(d,i){ return 100 + i*25})
+    .style("fill", function(d){ 
+      return color(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+  // append the svg object to the divs
+var svga = d3.select("#Chart2a")
+  .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+  .attr("transform", function(d){
+          return "translate(" + width / 2 + "," + height / 2 + ")"
+    })
+  .style("margin", "150px");
+
+  var arca = d3.arc()
+  .innerRadius(radius/2)
+      .outerRadius(radius);
+
+  var piea = d3.pie()
+    .value(function(d) {return d.value; })
+    .sort(null);
+
+  var patha = svga.selectAll('path')
+    .data(piea(d3.entries(dataa)))
+    .enter()
+    .append('path')
+    .attr('d', arca)
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "0.8px")
+    .on("mouseover", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity','0.85')
+      .style('stroke-width', '4px' );
+
+      div.transition()
+      .duration(50)
+      .style('opacity',1);
+      div
+      .html("Category : "+d.data.key+"<br>"+"Number of offenders : "+d.data.value+"<br> Percentage :"+((d.endAngle - d.startAngle)/(2*Math.PI)*100).toFixed(2))
+      .style("top",  (d3.mouse(this)[1]+200) + "px")
+       .style("left", (d3.mouse(this)[0]+200) + "px");
+    })
+    .on("mouseout", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity',1)
+      .style('stroke-width','0.8px');
+
+      div.transition()
+      .duration('50')
+      .style('opacity',0);
+    })
+
+ //Second Pie chart
+ var svgb = d3.select("#Chart2b")
+  .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+  .attr("transform", function(d){
+          return "translate(" + (width/2) + "," + (height/2) + ")"
+    })
+  .style("margin", "150px");
+
+  var pieb = d3.pie()
+    .value(function(d) {return d.value; })
+    .sort(null);
+
+  var arcb = d3.arc()
+  .innerRadius(radius/2)
+      .outerRadius(radius);
+
+  var pathb = svgb.selectAll("path")
+    .data(pieb(d3.entries(datab)))
+    .enter()
+    .append('path')
+    .attr("class", "arcb")
+    .attr('d', arcb)
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "0.8px")
+    .on("mouseover", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity','0.85')
+      .style('stroke-width', '4px' );
+
+      div.transition()
+      .duration(50)
+      .style('opacity',1);
+      div
+      .html("Category : "+d.data.key+"<br>"+"Number of offenders : "+d.data.value+"<br> Percentage :"+((d.endAngle - d.startAngle)/(2*Math.PI)*100).toFixed(2))
+      .style("top",  (d3.mouse(this)[1]+200) + "px")
+       .style("left", (d3.mouse(this)[0]+1000) + "px");
+    })
+    .on("mouseout", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity',1)
+      .style('stroke-width','0.8px');
+
+      div.transition()
+      .duration('50')
+      .style('opacity',0);
+    })
+}
+
+
+
+
+
+function change(dataa,datab)
+{
+d3.select('#Chart2a').selectAll("path").remove()
+d3.select('#Chart2b').selectAll("path").remove()
+
+
+div = d3.select(".tooltip-donut")
+
+
+  var piea=d3.pie()
+  .value(function(d){
+    return d.value;
+  })
+  .sort(null);
+
+  svga=d3.select("#Chart2a").select('svg').select('g')
+  .attr("transform", function(d){
+          return "translate(" + width / 2 + "," + height / 2 + ")"
+    })
+
+ var arca=d3.arc()
+  .innerRadius(radius/2)
+      .outerRadius(radius);
+
+
+  patha= svga.selectAll('path')
+    .data(piea(d3.entries(dataa)))
+    .enter()
+    .append('path')
+    .attr('d', arca)
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "0.8px")
+    .on("mouseover", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity','0.85')
+      .style('stroke-width', '4px' );
+
+      div.transition()
+      .duration(50)
+      .style('opacity',1);
+      div
+      .html("Category : "+d.data.key+"<br>"+"Number of offenders : "+d.data.value+"<br> Percentage :"+((d.endAngle - d.startAngle)/(2*Math.PI)*100).toFixed(2))
+      .style("top",  (d3.mouse(this)[1]+200) + "px")
+       .style("left", (d3.mouse(this)[0]+200) + "px");
+    })
+    .on("mouseout", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity',1)
+      .style('stroke-width','0.8px');
+
+      div.transition()
+      .duration('50')
+      .style('opacity',0);
+    })
+
+
+
+  //Second pie chart
+ var pieb = d3.pie()
+    .value(function(d) {return d.value; })
+    .sort(null);
+
+  svgb=d3.select("#Chart2b").select('svg').select('g')
+  .attr("transform", function(d){
+          return "translate(" + width / 2 + "," + height / 2 + ")"
+    })
+
+var arcb = d3.arc()
+  .innerRadius(radius/2)
+      .outerRadius(radius);
+
+
+  pathb= svgb.selectAll('path')
+    .data(pieb(d3.entries(datab)))
+    .enter()
+    .append('path')
+    .attr('d', arcb)
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "0.8px")
+    .on("mouseover", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity','0.85')
+      .style('stroke-width', '4px' );
+
+      div.transition()
+      .duration(50)
+      .style('opacity',1);
+      div
+      .html("Category : "+d.data.key+"<br>"+"Number of offenders : "+d.data.value+"<br> Percentage :"+((d.endAngle - d.startAngle)/(2*Math.PI)*100).toFixed(2))
+      .style("top",  (d3.mouse(this)[1]+200) + "px")
+       .style("left", (d3.mouse(this)[0]+1000) + "px");
+    })
+    .on("mouseout", function(d,i){
+      d3.select(this).transition()
+      .duration('50')
+      .attr('opacity',1)
+      .style('stroke-width','0.8px');
+
+      div.transition()
+      .duration('50')
+      .style('opacity',0);
+    })
+
+  d3.select('#legend').selectAll("circle").remove()
+  d3.select("#legend").selectAll("text").remove()
+
+
+  legend=d3.select('#legend').select("svg")
+
+
+  legend.selectAll("mydots")
+    .data(d3.keys(dataa))
+    .enter()
+    .append("circle")
+    .attr("cx", 50)
+    .attr("cy", function(d,i){return 100+i*25})
+    .attr("r",7)
+    .style("fill", function(d){return color(d)})
+
+legend.selectAll("labels")
+    .data(d3.keys(dataa))
+    .enter()
+    .append("text")
+    .attr("x", function(d,i){return 75})
+    .attr("y", function(d,i){ return 100 + i*25})
+    .style("fill", function(d){ 
+      return color(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+}
+
+
+
+// Initialize the plot with the first dataset
+draw(Age.O,Age.V)
+
+</script>

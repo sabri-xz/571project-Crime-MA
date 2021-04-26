@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="utf-8">
+    <style type="text/css">
+  
+      button {
+        display:inline-block;
+        
+        font:normal normal 200 1.3em 'Open Sans';
+        text-decoration:none; 
+        
+        color:#fda6a6;
+        background-color:transparent;
+        border:1.5px solid #fa9d9d;
+        border-radius:100px;
+        
+        padding: .3em 1.2em;
+        margin:5px;
+            
+        background-size: 200% 100%; 
+        background-image: linear-gradient(to right, transparent 50%, rgba(247, 156, 149, 1) 50%);
+        transition: background-position .3s cubic-bezier(0.19, 1, 0.22, 1) .1s, color .5s ease 0s, background-color .5s ease;
+      }
+      
+      button:hover{
+        color:rgba(255, 255, 255, 1);
+        background-color:rgb(247, 156, 149);
+        background-position: -100% 100%;
+      }
+    </style>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <div style="margin: 0px 35px;">
+    <button onclick="changeMatrix(data_w, col_lab_w, 'wd')">Weekday</button>
+    <button onclick="changeMatrix(data_m, col_lab_m, 'month')">Month</button>
+    </div>
+    <div id="Chart1" style="display: inline-block;"></div>
+    <div id="Chart2" style="display: inline-block;"></div>
+	<body>
+		<script type="text/javascript">
+    	//Width and height
+			var w = 300;
+			var h = 357.5;
+			var padding = 30;
+			
+      var col_lab_m, col_lab_w, type_lab;
+      
+      col_lab_m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 
+                   'Sep', 'Oct', 'Nov', 'Dec'];
+      col_lab_w = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 
+                   'Friday', 'Saturday'];
+      type_lab = ['Assault Offenses', 'Burglary/Breaking & Entering', 'Counterfeiting/Forgery', 
+                  'Destruction/Damage/Vandalism of Property', 'Drug/Narcotic Offenses',
+                  'Fraud Offenses', 'Larceny/Theft Offenses', 'Motor Vehicle Theft', 'Robbery',
+                  'Weapon Law Violations', 'Homicide Offenses', 'Kidnapping/Abduction', 
+                  'Sex Offenses', 'Embezzlement', 'Stolen Property Offenses', 'Arson',
+                  'Extortion/Blackmail', 'Sex Offenses, Non-forcible', 'Prostitution Offenses',
+                  'Pornography/Obscene Material', 'Gambling Offenses', 'Animal Cruelty', 
+                  'Bribery', 'Human Trafficking'];
+
+      var data_type = new Array(24);
+      var data_m = new Array(288);
+      var data_w = new Array(168);
+      for (let i = 0; i < 24; ++i) {
+        data_type[i] = 0;
+        for (let j = 0; j < 12; ++j) {
+          data_m[i*12 + j] = {hour: i, month: col_lab_m[j], num: 0, types: {}};
+        }
+        for (let k = 0; k < 7; ++k) {
+          data_w[i*7 + k] = {hour: i, wd: col_lab_w[k], num: 0, types: {}};
+        }
+      }
+
+      // drawMatrix (data_: Array, labs: String[], mw: String) : void
+      function drawMatrix(data_, labs, mw) {
+        var matrix = d3.select("#Chart1").append("svg")
+            .attr("class", "matrix")
+            .attr("width", w + 2*padding)
+            .attr("height", h + 3*padding)
+            .append("g")
+            .attr("transform", "translate(" + 0 + "," + padding + ")");
+
+        matrix.append("rect")
+            .attr("class", "background")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("fill", "white")
+            .attr("x", padding);
+
+        var x = d3.scaleBand()
+          .domain(labs)
+          .range([0, w]);
+
+        var y = d3.scaleBand()
+          .domain(d3.range(24))
+          .range([0, h]);
+
+        var colorMap = d3.scaleLinear()
+          .domain([0, d3.max(data_, (d) => d.num)/2 + 50, d3.max(data_, (d) => d.num) + 50])
+          .range(["#C2EAFF", "#E6E0FF", "#FF7D6E"]);
+
+        matrix.selectAll()
+          .data(data_, (d, i) => d[mw] + ":" + d.hour)
+          .enter()
+          .append("rect")
+            .attr("x", (d) => padding + x(d[mw]))
+            .attr("y", (d) => y(d.hour))
+            .attr("width", x.bandwidth() - 0.5)
+            .attr("height", y.bandwidth() - 0.5)
+            .style("fill", (d) => colorMap(d.num))
+          .append("title")
+          .text((d) => d.num);
+        
+        matrix.selectAll("rect")
+          .on("click", (d) => {
+            var new_data = Object.values(d.types);
+            var new_labs = Object.keys(d.types);
+            drawBar(new_data, new_labs);
+          });
+
+        // axis & labels 
+        matrix.append("g")
+          .attr("transform", "translate(" + padding + "," + h + ")")
+          .call(d3.axisBottom(x).tickSize(0))
+          .selectAll("text")
+            .attr("transform", "translate(-1, 0)rotate(-45)")
+            .attr("text-anchor", "end");
+        
+        matrix.append("g")
+          .attr("transform", "translate(" + padding + ", 0 )")
+          .call(d3.axisLeft(y).tickSize(0))
+          .select(".domain").remove();
+      }
+
+      function changeMatrix(data_, labs, mw) {
+        d3.select("#Chart1").selectAll("*").remove();;
+        console.log("im trying to change matrix");
+        drawMatrix(data_, labs, mw);
+      }
+      
+      // drawBar(data_: Array, labs: String[]) : void 
+      function drawBar(data_, labs) {
+        d3.select("#Chart2").selectAll("*").remove();
+
+        var bars = d3.select("#Chart2").append("svg")
+          .attr("class", "bar")
+          .attr("width", w*2 + 2*padding)
+          .attr("height", h + 2*padding)
+          .append("g")
+          .attr("transform", "translate(" + 0 + "," + 0 + ")")
+
+        var yScale = d3.scaleBand()
+                    .domain(labs)
+                    .range([padding, h - padding])
+                    .padding(0.1);
+        var xScale = d3.scaleLinear()
+                    .domain([0, d3.max(data_)])
+                    .range([padding, w*2-padding]);
+
+        bars.selectAll("rects")
+          .data(data_)
+          .enter()
+          .append("rect")
+            .attr("x", (d) => xScale(0)+118)
+            .attr("y", (d, i) => yScale(labs[i]))
+            .attr("width", (d) => xScale(d))
+            .attr("height", yScale.bandwidth())
+            .attr("fill", "#FF7D6E")
+            .append("title")
+            .text(d => d);
+        
+        bars.append("g")
+          .attr("class", "xAxis")
+          .attr("transform", "translate(" + 118 +"," + (h-padding) + ")")
+          .call(d3.axisBottom(xScale))
+          .selectAll("text")
+            .attr("transform", "translate(-10, 0)rotate(-45)")
+            .style("text-anchor", "end");
+        bars.append("g")
+          .attr("class", "yAxis")
+          .attr("transform", "translate(" + (padding+118) +"," + 0 + ")")
+          .call(d3.axisLeft(yScale));
+      }
+
+      var samp_lab = Object.keys(data_m[0].types);
+      var samp_dat = Object.values(data_m[0].types);
+
+      function whenClick(d_, labs) {
+        drawBar()
+      }
+
+			//Load in data
+			d3.csv("https://raw.githubusercontent.com/sasana-uwu/571-project/main/data.csv", function(d) {
+        for (var i = 0; i < d.length; ++i) {
+          data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].num += parseInt(d[i].cnt);
+          data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].num += parseInt(d[i].cnt);
+          if(data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].types[d[i].off_cat] === undefined) {
+            data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].types[d[i].off_cat] = parseInt(d[i].cnt);
+          } else {
+            data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].types[d[i].off_cat] += parseInt(d[i].cnt);
+          }
+          if(data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].types[d[i].off_cat] === undefined) {
+            data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].types[d[i].off_cat] = parseInt(d[i].cnt);
+          } else {
+            data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].types[d[i].off_cat] += parseInt(d[i].cnt);
+          }
+          data_type[type_lab.indexOf(d[i].off_cat)] += parseInt(d[i].cnt);
+        }
+
+        // start with month matrix
+        drawMatrix(data_m, col_lab_m, "month");
+       
+        // start with overall bar chart of types 
+        drawBar(data_type, type_lab);
+       });
+		</script>
+	</body>
+</html>
