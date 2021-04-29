@@ -103,7 +103,9 @@ text-decoration: none;
 		We used these two variables to visualize the chart below<br><br>
 
 		The first thing that we noted was that the age ranged from 13-78. The visualizations created of this huge range were extremely difficult to read and thus we deicded to consolidate the data and narrow down the age ranges into groups of 10, ranging from the age of 11 to the age of 80. <br>
+		We also realized that it was equally important to see each age range and each drug as a seperate bar chart to truly understand the trends for these. A heatmap, while good to get an understanding as a whole, was not enough for someone who would want to understand trends of a praticular age group or a particular drug. <br><br>
 		Thus we created a heat map of the entire consolidated data, along with corresponding bar charts that appear when the mouse hovers over any cell, to show all teh visualizations that one might need to make any observations with this data. <br>
+		A tooltip also helps show the exact number of incidents with any one cell in the heat map, along with details on the Age group and the drug type for each cell.<br>
 	</p>
     <div class="Chart_1">
 
@@ -117,16 +119,21 @@ text-decoration: none;
 	<p style="margin-left:100px;margin-right: 100px">
     		The dataset that we used had a lot of details of the offenders as well as the victims for every crime. This included data such as their age, sex, race and ethinicty, all of which is generally interesting to identify the trends in crimes with respect to who commits them and who they are commited against. <br><br>
     		In order to identify these trends we decided to make pie charts to show the distribution of the offenders and victims across these 4 categories. We also decided to show the pie charts side by side so that it is easy to compare the distribution of the offenders with the distribution of victims. <br>
-    		<br><br>
+    		A set of buttons on the top of the charts helps in toggling between the different categories, while a tooltip helps to understand the exact category, number of peeople, as well as the percentage in terms of all the offenders or victims<br><br>
     	</p>
     <div class="Chart_2">
-      <iframe frameborder="0" scrolling="no" src="chart2.html" height="100%" width="100%" style="height:2000px;!important"></iframe>
+      <iframe frameborder="0" scrolling="no" src="chart2.html" height="100%" width="100%" style="height:550px;!important"></iframe>
     </div>
 </div>
 
 <!-- Chart 3 -->
 <div class="Charts" id="Chart3">
-	<h3><b>CHART 3</b></h3>
+	<h3><b>CHART 3: Number of crime incidents per victim/offender relationship</b></h3>
+	<p style="margin-left:100px;margin-right: 100px">
+		The dataset listed crimes by type as well as the relationship between the victim of that crime and the offender. This chart allows you to select a type of crime
+		to view how many instances of this crime occurred for each victim/offender relationship, and automatically sorts the bars in descending order. Hover over a bar 
+		to view the exact number of crimes that occurred for some relationship.
+	</p>
     <div class="Chart_3">
        <iframe frameborder="0" scrolling="no" src="chart3.html" height="100%" width="100%" style="height:650px;!important"></iframe>
     </div>
@@ -136,8 +143,16 @@ text-decoration: none;
 <div class="Charts" id="Chart4">
 	<h3><b>CHART 4</b></h3>
     <div class="Chart_4">
+		<p>In the dataset, we were able to obtain information regarding the time and date for which 
+			incidents occured, and the types of incidents, with these information we created the 
+			visualisations below, the chart on the left displays the distribution of crimes on different 
+			hours of the day and different weekday/month (the x-axis can be changed with the button), 
+			and the chart on the right displays the distribution of incidents across different types of 
+			crime, by clicking on the slots on the chart on the left, the chart on the right will display
+			the distribution of crimes from 2019, in Massachusetts, in the corresponding hour of the day
+			and month/weekday, across different types.
+			</p>
 	    <iframe frameborder="0" scrolling="no" src="chart4.html" height="100%" width="100%" style="height:500px;!important"></iframe>
-      <p>ugwsbdjniekmdwswdqmwqm CHART 4 jswdubsawk</p>
     </div>
 </div>
 
