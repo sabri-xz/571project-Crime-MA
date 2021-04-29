@@ -106,9 +106,7 @@
             .attr("y", (d) => y(d.hour))
             .attr("width", x.bandwidth() - 0.5)
             .attr("height", y.bandwidth() - 0.5)
-            .style("fill", (d) => colorMap(d.num))
-          .append("title")
-          .text((d) => d.num);
+            .style("fill", (d) => colorMap(d.num));
         
         matrix.selectAll("rect")
           .on("click", (d) => {
