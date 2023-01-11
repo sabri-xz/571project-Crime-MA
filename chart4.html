@@ -185,6 +185,7 @@
         for (var i = 0; i < d.length; ++i) {
           data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].num += parseInt(d[i].cnt);
           data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].num += parseInt(d[i].cnt);
+          console.log(data_m)
           if(data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].types[d[i].off_cat] === undefined) {
             data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].types[d[i].off_cat] = parseInt(d[i].cnt);
           } else {
