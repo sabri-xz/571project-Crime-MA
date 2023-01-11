@@ -181,7 +181,7 @@
       var samp_dat = Object.values(data_m[0].types);
 
 			//Load in data
-			d3.csv("https://raw.githubusercontent.com/sasana-uwu/571-project/main/data.csv", function(d) {
+			d3.csv("https://raw.githubusercontent.com/sabri-xz/571project-Crime-MA/main/data/data.csv", function(d) {
         for (var i = 0; i < d.length; ++i) {
           data_m[d[i].hour*12 + col_lab_m.indexOf(d[i].month)].num += parseInt(d[i].cnt);
           data_w[d[i].hour*7 + col_lab_w.indexOf(d[i].weekday)].num += parseInt(d[i].cnt);
